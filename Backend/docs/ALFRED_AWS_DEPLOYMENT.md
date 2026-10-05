@@ -107,15 +107,79 @@ alfred-backend
 alfred-ai
 ```
 
-The workflow builds:
+These repositories store the Docker images built by GitHub Actions:
 
 - `Dockerfile` -> `alfred-backend`
 - `AI/Dockerfile` -> `alfred-ai`
 
-Each image is pushed with:
+Each image is pushed with two tags:
 
 - the Git SHA tag
 - `latest`
+
+In AWS Console:
+
+1. Go to `Elastic Container Registry`.
+2. Make sure the selected region is `US East (Ohio) us-east-2`.
+3. Open `Repositories`.
+4. Click `Create repository`.
+5. Choose `Private`.
+6. Repository name:
+
+```text
+alfred-backend
+```
+
+7. Leave tag immutability disabled for the first deployment, because the workflow updates the `latest` tag.
+8. Enable basic scan-on-push if you want vulnerability findings from AWS.
+9. Click `Create repository`.
+10. Repeat the same process for:
+
+```text
+alfred-ai
+```
+
+After creating both repositories, their full URIs will look like:
+
+```text
+ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/alfred-backend
+ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/alfred-ai
+```
+
+For GitHub Actions, use repository names only:
+
+```text
+ECR_BACKEND_REPOSITORY=alfred-backend
+ECR_AI_REPOSITORY=alfred-ai
+```
+
+Do not paste the full ECR URI into those GitHub secrets. The workflow gets the registry from AWS login and combines it with the repository names.
+
+Correct:
+
+```text
+ECR_BACKEND_REPOSITORY=alfred-backend
+ECR_AI_REPOSITORY=alfred-ai
+```
+
+Incorrect:
+
+```text
+ECR_BACKEND_REPOSITORY=123456789012.dkr.ecr.us-east-2.amazonaws.com/alfred-backend
+```
+
+Optional cleanup after deployment is stable:
+
+1. Open each ECR repository.
+2. Go to `Lifecycle policy`.
+3. Add a rule to keep the latest 10 or 20 images.
+4. Apply the same cleanup policy to both `alfred-backend` and `alfred-ai`.
+
+Why this matters:
+
+- GitHub Actions pushes one backend image and one AI image on every deployment.
+- ECR storage grows over time if old image tags are never cleaned.
+- Keeping several recent images is useful for rollback, but keeping every image forever is usually unnecessary.
 
 ## S3 Media
 
@@ -125,10 +189,33 @@ Create an S3 bucket in `us-east-2`, for example:
 alfred-media-prod
 ```
 
+In AWS Console:
+
+1. Go to `S3`.
+2. Click `Create bucket`.
+3. Bucket type: `General purpose`.
+4. Bucket name:
+
+```text
+alfred-media-prod
+```
+
+5. Region:
+
+```text
+US East (Ohio) us-east-2
+```
+
+6. Keep `Object Ownership` as `Bucket owner enforced`.
+7. For this deployment, uploaded media is public so dashboards/apps can load media without signed URLs. Disable bucket-level `Block all public access`, then acknowledge the warning.
+8. Leave bucket versioning disabled unless you specifically want media object history.
+9. Leave default encryption enabled. Amazon S3 managed keys are fine for the first deployment.
+10. Click `Create bucket`.
+
 Recommended first setup:
 
 - Keep object ownership as bucket-owner-enforced.
-- Keep sensitive media private.
+- Treat this bucket as public media storage. Do not upload sensitive/private documents into this bucket.
 - Let the EC2 IAM role provide AWS credentials.
 - Leave `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` blank in `.env.production`.
 
@@ -138,16 +225,127 @@ Production env:
 USE_S3=True
 AWS_STORAGE_BUCKET_NAME=alfred-media-prod
 AWS_S3_REGION_NAME=us-east-2
-AWS_QUERYSTRING_AUTH=True
+AWS_QUERYSTRING_AUTH=False
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 ```
 
-If public image URLs are needed later, add a careful bucket policy or CloudFront setup. Avoid making the entire bucket public if it may contain user documents or sensitive uploads.
+This project stores Django media through `django-storages`. With `USE_S3=True`, uploaded media goes to the configured S3 bucket instead of the EC2 disk. With `AWS_QUERYSTRING_AUTH=False`, Django returns clean public media URLs instead of signed URLs.
+
+Important:
+
+- `AWS_STORAGE_BUCKET_NAME` must match the real bucket name.
+- `AWS_S3_REGION_NAME` must be `us-east-2`.
+- `AWS_QUERYSTRING_AUTH=False` is required for public, unsigned media URLs.
+- Leave AWS keys blank when the EC2 IAM role is attached correctly.
+- The app container receives AWS credentials automatically from the EC2 instance metadata service.
+
+S3 permissions come from the EC2 IAM role, not from this bucket screen. The role is configured in the `EC2 IAM Role` section below.
+
+Add this bucket policy in the S3 bucket `Permissions` tab, replacing `alfred-media-prod` with your real bucket name:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPublicReadForAlfredMedia",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::alfred-media-prod/media/*"
+    }
+  ]
+}
+```
+
+This policy allows public reads only for objects under the `media/` prefix, which matches the Django storage `location` configured in `Backend/core/settings.py`.
+
+Optional S3 CORS rule:
+
+If your frontend needs direct browser reads from S3 media URLs, add a CORS rule like this in the S3 bucket `Permissions` tab:
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedOrigins": [
+      "http://YOUR_ELASTIC_IP",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Because media is public in this setup, avoid uploading private documents, private audio, receipts, support attachments, or sensitive user files into this bucket. If private uploads are needed later, use a separate private bucket/storage backend or switch those fields to signed URLs.
+
+After deployment, test S3 by uploading a file through the API and checking that the object appears in the bucket. If upload fails with `AccessDenied`, check:
+
+- EC2 IAM role is attached.
+- IAM role has access to this bucket.
+- Bucket name in `.env.production` is correct.
+- Region in `.env.production` is `us-east-2`.
+If upload succeeds but dashboard media URLs return `403 AccessDenied`, check:
+
+- Bucket-level Block Public Access is not blocking public bucket policies.
+- The bucket policy uses the exact bucket name.
+- The object key starts with `media/`.
+- `AWS_QUERYSTRING_AUTH=False` is set in `.env.production`.
 
 ## RDS PostgreSQL
 
 Create RDS PostgreSQL in `us-east-2`.
+
+In AWS Console:
+
+1. Go to `RDS`.
+2. Click `Create database`.
+3. Choose `Standard create`.
+4. Engine type:
+
+```text
+PostgreSQL
+```
+
+5. Engine version: choose the latest stable PostgreSQL version offered by AWS unless you have a project-specific reason to pin an older one.
+6. Templates: choose `Free tier` for testing or a small production/dev template for real production.
+7. DB instance identifier:
+
+```text
+alfred-postgres
+```
+
+8. Master username:
+
+```text
+alfred_admin
+```
+
+9. Set a strong master password and store it securely.
+10. Instance class: start with a small class that fits your budget. For real production, avoid undersizing.
+11. Storage: start with allocated storage that fits your data needs and enable storage autoscaling if appropriate.
+12. Connectivity: use the same VPC that the EC2 instance will use.
+13. Public access:
+
+```text
+No
+```
+
+14. VPC security group: create or select an RDS security group.
+15. Database authentication: `Password authentication`.
+16. Additional configuration -> Initial database name:
+
+```text
+alfred
+```
+
+17. Enable automated backups for production.
+18. Enable deletion protection for real production.
+19. Click `Create database`.
 
 Recommended values:
 
@@ -160,6 +358,18 @@ Port: 5432
 VPC: same VPC as EC2
 Backups: Enabled
 Deletion protection: Enabled for real production
+```
+
+After creation:
+
+1. Open the RDS database.
+2. Copy the endpoint.
+3. Use that endpoint as `DB_HOST`.
+
+The endpoint looks like:
+
+```text
+alfred-postgres.xxxxxxxxxxxx.us-east-2.rds.amazonaws.com
 ```
 
 Production env:
@@ -179,11 +389,110 @@ RDS security group inbound rule:
 PostgreSQL TCP 5432 from alfred-backend-sg
 ```
 
-Do not expose PostgreSQL to `0.0.0.0/0`.
+Detailed security group setup:
+
+1. Open the RDS database details.
+2. Open the attached VPC security group.
+3. Go to `Inbound rules`.
+4. Add a rule:
+
+```text
+Type: PostgreSQL
+Protocol: TCP
+Port: 5432
+Source: EC2 security group ID for alfred-backend-sg
+```
+
+Use the EC2 security group as the source, not your laptop IP. Django runs on EC2, so EC2 needs database access.
+
+Do not expose PostgreSQL to:
+
+```text
+0.0.0.0/0
+```
+
+Common first-time problem:
+
+```text
+django.db.utils.OperationalError: connection timed out
+```
+
+Usually this means:
+
+- EC2 and RDS are not in reachable networking.
+- RDS public access/VPC/subnet choices are wrong.
+- The RDS security group does not allow PostgreSQL from the EC2 security group.
+- `DB_HOST` is wrong in `.env.production`.
 
 ## EC2
 
 Create an Ubuntu EC2 instance in `us-east-2`.
+
+In AWS Console:
+
+1. Go to `EC2`.
+2. Make sure the selected region is `US East (Ohio) us-east-2`.
+3. Click `Launch instance`.
+4. Name:
+
+```text
+alfred-backend-prod
+```
+
+5. Application and OS image:
+
+```text
+Ubuntu Server 24.04 LTS
+```
+
+6. Instance type:
+
+```text
+t3.small or larger
+```
+
+7. Key pair:
+
+Create or select a key pair you can use with PuTTY.
+
+If AWS gives you a `.pem` file and you use PuTTY, convert it to `.ppk` with PuTTYgen:
+
+1. Open PuTTYgen.
+2. Click `Load`.
+3. Select the `.pem` file.
+4. Click `Save private key`.
+5. Save the `.ppk` file somewhere safe.
+
+8. Network settings:
+
+Create a new security group:
+
+```text
+alfred-backend-sg
+```
+
+Inbound rules for the first phase:
+
+```text
+SSH   TCP 22  YOUR_PUBLIC_IP/32
+HTTP  TCP 80  0.0.0.0/0
+```
+
+9. Storage:
+
+Use at least:
+
+```text
+20 GiB
+```
+
+10. Launch the instance.
+11. Wait until:
+
+```text
+Instance state: Running
+Status checks: 2/2 checks passed
+```
 
 Recommended:
 
@@ -202,6 +511,19 @@ SSH   TCP 22  YOUR_PUBLIC_IP/32
 HTTP  TCP 80  0.0.0.0/0
 ```
 
+Finding your public IP:
+
+- Search `what is my IP` in your browser.
+- Use the returned IP as `YOUR_PUBLIC_IP/32`.
+
+Example:
+
+```text
+103.55.22.11/32
+```
+
+If your home or office IP changes, update the SSH rule before trying PuTTY again.
+
 Do not open these publicly:
 
 ```text
@@ -210,13 +532,96 @@ Do not open these publicly:
 5432 PostgreSQL
 ```
 
-Allocate and attach an Elastic IP. Use that IP for:
+After creating the EC2 instance, copy its security group ID. You will use that security group ID as the allowed source in the RDS security group.
+
+Allocate and attach an Elastic IP:
+
+1. Go to `EC2`.
+2. Open `Elastic IPs`.
+3. Click `Allocate Elastic IP address`.
+4. Keep the default Amazon IPv4 pool.
+5. Allocate.
+6. Select the new Elastic IP.
+7. Click `Actions`.
+8. Click `Associate Elastic IP address`.
+9. Choose the `alfred-backend-prod` instance.
+10. Associate.
+
+Save the Elastic IP. You will use it for:
 
 - `EC2_HOST`
 - `ALLOWED_HOSTS`
 - `CORS_ALLOWED_ORIGINS`
 - `CSRF_TRUSTED_ORIGINS`
 - `BASE_URL`
+
+Temporary production URLs before domain/SSL:
+
+```text
+API:     http://YOUR_ELASTIC_IP/
+Health:  http://YOUR_ELASTIC_IP/health/
+Admin:   http://YOUR_ELASTIC_IP/admin/
+Swagger: http://YOUR_ELASTIC_IP/api/docs/
+```
+
+PuTTY connection settings:
+
+```text
+Host Name: ubuntu@YOUR_ELASTIC_IP
+Port: 22
+Connection type: SSH
+Private key: your .ppk file
+```
+
+In PuTTY:
+
+1. Open `Session`.
+2. Host Name:
+
+```text
+ubuntu@YOUR_ELASTIC_IP
+```
+
+3. Port:
+
+```text
+22
+```
+
+4. Open `Connection > SSH > Auth > Credentials`.
+5. Browse for the `.ppk` private key.
+6. Return to `Session`.
+7. Save the session if you want.
+8. Click `Open`.
+
+Common PuTTY errors:
+
+```text
+Network error: Connection timed out
+```
+
+Usually means:
+
+- Wrong Elastic IP.
+- EC2 instance is stopped.
+- EC2 security group does not allow SSH from your current IP.
+
+```text
+Permission denied
+Server refused our key
+```
+
+Usually means:
+
+- Wrong key pair.
+- Wrong username.
+- `.ppk` does not match the EC2 key pair.
+
+For Ubuntu EC2 instances, the username is:
+
+```text
+ubuntu
+```
 
 ## EC2 IAM Role
 
@@ -225,20 +630,114 @@ Attach an IAM role to EC2 with:
 - ECR read access
 - S3 access to the Alfred media bucket
 
-Fast first pass:
+In AWS Console:
+
+1. Go to `IAM`.
+2. Open `Roles`.
+3. Click `Create role`.
+4. Trusted entity type:
+
+```text
+AWS service
+```
+
+5. Use case:
+
+```text
+EC2
+```
+
+6. Click `Next`.
+7. For the first deployment, attach:
 
 ```text
 AmazonEC2ContainerRegistryReadOnly
 AmazonS3FullAccess
 ```
 
-Tighten S3 later to a bucket-specific policy.
+8. Role name:
+
+```text
+alfred-ec2-role
+```
+
+9. Create the role.
+
+Attach the role to EC2:
+
+1. Go to `EC2`.
+2. Open the `alfred-backend-prod` instance.
+3. Click `Actions`.
+4. Open `Security`.
+5. Click `Modify IAM role`.
+6. Select:
+
+```text
+alfred-ec2-role
+```
+
+7. Save.
+
+Why this role is needed:
+
+- EC2 needs to pull private Docker images from ECR during deploy.
+- Django needs to upload/read media files in S3.
+- Using an EC2 role avoids storing AWS access keys in `.env.production`.
+
+With the EC2 role attached, these env vars should stay blank:
+
+```env
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+```
+
+Tighten S3 later to a bucket-specific policy. Example:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::alfred-media-prod",
+        "arn:aws:s3:::alfred-media-prod/*"
+      ]
+    }
+  ]
+}
+```
+
+When you tighten permissions, replace `alfred-media-prod` with your real bucket name.
 
 Verify on EC2:
 
 ```bash
 aws sts get-caller-identity
 ```
+
+Expected output should include an assumed-role ARN, similar to:
+
+```json
+{
+  "UserId": "...",
+  "Account": "123456789012",
+  "Arn": "arn:aws:sts::123456789012:assumed-role/alfred-ec2-role/..."
+}
+```
+
+If this fails:
+
+- Confirm the IAM role is attached to the EC2 instance.
+- Confirm AWS CLI is installed.
+- Confirm the instance metadata service is available.
+- Log out and reconnect after attaching the role if needed.
 
 ## Install Runtime On EC2
 
@@ -314,7 +813,7 @@ REDIS_PORT=6379
 USE_S3=True
 AWS_STORAGE_BUCKET_NAME=YOUR_S3_BUCKET_NAME
 AWS_S3_REGION_NAME=us-east-2
-AWS_QUERYSTRING_AUTH=True
+AWS_QUERYSTRING_AUTH=False
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 
