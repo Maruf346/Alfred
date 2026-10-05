@@ -8,6 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
+def env_bool(name: str, default: bool = False) -> bool:
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name: str, default: str = "") -> list[str]:
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -15,9 +23,9 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zni!mh*jn_$_4%$s=dz3i(bw$r(c4)*ht@b(y%+@f$^6m75aqk')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = env_bool('DEBUG', True)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 
 # Application definition
@@ -96,9 +104,9 @@ if not DEBUG:
     USE_X_FORWARDED_HOST         = True
     SECURE_PROXY_SSL_HEADER      = ("HTTP_X_FORWARDED_PROTO", "https")
     # Don't redirect HTTP→HTTPS yet (we're on HTTP until domain+SSL is set up)
-    SECURE_SSL_REDIRECT          = False
-    SESSION_COOKIE_SECURE        = False  # Set True after SSL is configured
-    CSRF_COOKIE_SECURE           = False  # Set True after SSL is configured
+    SECURE_SSL_REDIRECT          = env_bool('SECURE_SSL_REDIRECT', False)
+    SESSION_COOKIE_SECURE        = env_bool('SESSION_COOKIE_SECURE', False)  # Set True after SSL is configured
+    CSRF_COOKIE_SECURE           = env_bool('CSRF_COOKIE_SECURE', False)  # Set True after SSL is configured
     SECURE_BROWSER_XSS_FILTER    = True
     SECURE_CONTENT_TYPE_NOSNIFF  = True
     X_FRAME_OPTIONS              = "SAMEORIGIN"
@@ -110,7 +118,7 @@ if not DEBUG:
 # ── CORS & CSRF Settings ─────────────────────────────────────────────────────
 _cors_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
 if _cors_origins_env:
-    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+    CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS')
     CORS_ALLOW_ALL_ORIGINS = False
 else:
     # Development fallback — allow all
@@ -136,6 +144,8 @@ if _cors_origins_env:
         _origin = _origin.strip()
         if _origin:
             _csrf_trusted.add(_origin)
+for _origin in env_list('CSRF_TRUSTED_ORIGINS'):
+    _csrf_trusted.add(_origin)
 CSRF_TRUSTED_ORIGINS = list(_csrf_trusted)
 
 
@@ -259,17 +269,18 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 #   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME,
 #   AWS_S3_REGION_NAME (e.g. eu-north-1)
 
-_USE_S3 = os.getenv('USE_S3', 'False') == 'True'
+_USE_S3 = env_bool('USE_S3', env_bool('USE_S3_MEDIA', False))
 
 if _USE_S3:
     # ── AWS S3 Configuration ─────────────────────────────────────────────
     AWS_ACCESS_KEY_ID       = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY   = os.getenv('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME      = os.getenv('AWS_S3_REGION_NAME', 'eu-north-1')
+    AWS_S3_REGION_NAME      = os.getenv('AWS_S3_REGION_NAME', 'us-east-2')
     AWS_S3_CUSTOM_DOMAIN    = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
     AWS_S3_FILE_OVERWRITE   = False    # Don't overwrite files with same name
     AWS_DEFAULT_ACL         = None     # Use bucket policy, not object ACL
+    AWS_QUERYSTRING_AUTH    = env_bool('AWS_QUERYSTRING_AUTH', True)
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }

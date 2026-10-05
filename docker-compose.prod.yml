@@ -1,0 +1,122 @@
+name: alfred-backend
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: alfred-nginx
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./Backend/deploy/nginx/alfred.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+    networks:
+      - alfred
+
+  web:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}
+    container_name: alfred-web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      WAIT_FOR_DATABASE: "true"
+      RUN_COLLECTSTATIC: "true"
+      RUN_MIGRATIONS: "true"
+      ALFRED_AI_BASE_URL: "http://ai:8000"
+    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
+    expose:
+      - "8000"
+    volumes:
+      - static_volume:/app/staticfiles
+    depends_on:
+      - redis
+      - ai
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=5)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - alfred
+
+  ai:
+    image: ${AI_IMAGE:?AI_IMAGE is required}
+    container_name: alfred-ai
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      ENV: "production"
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      REQUIRE_SERVICE_API_KEY_IN_DEV: "true"
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - alfred
+
+  celery_worker:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}
+    container_name: alfred-celery-worker
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      WAIT_FOR_DATABASE: "true"
+      RUN_COLLECTSTATIC: "false"
+      RUN_MIGRATIONS: "false"
+      ALFRED_AI_BASE_URL: "http://ai:8000"
+    command: celery -A core worker --loglevel=INFO
+    depends_on:
+      - redis
+      - web
+      - ai
+    networks:
+      - alfred
+
+  celery_beat:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}
+    container_name: alfred-celery-beat
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      WAIT_FOR_DATABASE: "true"
+      RUN_COLLECTSTATIC: "false"
+      RUN_MIGRATIONS: "false"
+      ALFRED_AI_BASE_URL: "http://ai:8000"
+    command: celery -A core beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - redis
+      - web
+      - ai
+    networks:
+      - alfred
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: alfred-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - alfred
+
+volumes:
+  static_volume:
+  redis_data:
+
+networks:
+  alfred:
+    name: alfred

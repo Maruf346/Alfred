@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Git and editor state
+.git/
+.gitignore
+.vscode/
+.idea/
+.history/
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+.aws/
+firebase-credentials.json
+
+# Local runtime data
+media/
+staticfiles/
+db_volume/
+*.sqlite3
+celerybeat-schedule*
+
+# Docs / misc local files
+.codex/
+.refact/
+.claude/

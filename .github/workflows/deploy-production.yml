@@ -1,0 +1,87 @@
+name: Deploy Alfred Services
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_BACKEND_REPOSITORY: ${{ secrets.ECR_BACKEND_REPOSITORY || secrets.ECR_REPOSITORY || 'alfred-backend' }}
+  ECR_AI_REPOSITORY: ${{ secrets.ECR_AI_REPOSITORY || 'alfred-ai' }}
+  DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/alfred-backend' }}
+
+jobs:
+  build-and-deploy:
+    name: Build, push, and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push images
+        id: images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          BACKEND_IMAGE_URI="$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG"
+          AI_IMAGE_URI="$ECR_REGISTRY/$ECR_AI_REPOSITORY:$IMAGE_TAG"
+
+          docker build -f Dockerfile -t "$BACKEND_IMAGE_URI" -t "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:latest" .
+          docker build -f AI/Dockerfile -t "$AI_IMAGE_URI" -t "$ECR_REGISTRY/$ECR_AI_REPOSITORY:latest" AI
+
+          docker push "$BACKEND_IMAGE_URI"
+          docker push "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:latest"
+          docker push "$AI_IMAGE_URI"
+          docker push "$ECR_REGISTRY/$ECR_AI_REPOSITORY:latest"
+
+          echo "backend_image_uri=$BACKEND_IMAGE_URI" >> "$GITHUB_OUTPUT"
+          echo "ai_image_uri=$AI_IMAGE_URI" >> "$GITHUB_OUTPUT"
+
+      - name: Upload deployment files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml,Backend/deploy/nginx/alfred.conf"
+          target: "${{ env.DEPLOY_PATH }}"
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          BACKEND_IMAGE: ${{ steps.images.outputs.backend_image_uri }}
+          AI_IMAGE: ${{ steps.images.outputs.ai_image_uri }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          envs: BACKEND_IMAGE,AI_IMAGE,AWS_REGION,ECR_REGISTRY,DEPLOY_PATH
+          script: |
+            set -e
+            cd "$DEPLOY_PATH"
+            test -f .env.production
+            aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+            export BACKEND_IMAGE="$BACKEND_IMAGE"
+            export AI_IMAGE="$AI_IMAGE"
+            docker compose --env-file .env.production -f docker-compose.prod.yml pull
+            docker compose --env-file .env.production -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+            docker compose --env-file .env.production -f docker-compose.prod.yml ps
