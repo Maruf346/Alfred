@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Zephyr Restaurant & Lounge",
+    "rating": 4.3,
+    "price_level": null,
+    "address": "Catharsis Tower, House-133 Rd 12",
+    "url": null
+  },
+  {
+    "name": "VAULT | Modern Asian Restaurant",
+    "rating": 4.6,
+    "price_level": "৳2,000+",
+    "address": "Autograph Tower, Kemal Ataturk Ave",
+    "url": null
+  },
+  {
+    "name": "Tu do Restaurant",
+    "rating": 4.6,
+    "price_level": null,
+    "address": "House- 59 Road No.7",
+    "url": null
+  },
+  {
+    "name": "Sukumvit Thai Restaurant",
+    "rating": 4.9,
+    "price_level": "৳2,000+",
+    "address": "Level-5, Elegant Tower, House-42 Rd 52",
+    "url": null
+  },
+  {
+    "name": "The Garden Kitchen at Sheraton Dhaka",
+    "rating": 4.5,
+    "price_level": "৳2,000+",
+    "address": "44 Kemal Ataturk Ave",
+    "url": null
+  },
+  {
+    "name": "Thai Chi Restaurant & Cafe",
+    "rating": 4.1,
+    "price_level": "৳400–1,400",
+    "address": "Level 7, 117/A, Puraton, Rangs Bhaban, Bijay Sarani, Biman Bondor Sarak",
+    "url": null
+  },
+  {
+    "name": "MANZO Restaurant Dhaka",
+    "rating": 4.5,
+    "price_level": "৳2,000+",
+    "address": "2nd Floor, 114 Gulshan Ave",
+    "url": null
+  },
+  {
+    "name": "The Grove Bistro",
+    "rating": 4.5,
+    "price_level": "৳800–2,000",
+    "address": "Level 12, Hamid Tower, Gulshan Circle 2, 22 DIT II Cir",
+    "url": null
+  },
+  {
+    "name": "Breeze Restaurant",
+    "rating": 4.4,
+    "price_level": "৳200–1,400",
+    "address": "House# 1/C, 1/D, Road# 16",
+    "url": null
+  },
+  {
+    "name": "Ciao Dhaka",
+    "rating": 4.7,
+    "price_level": null,
+    "address": "House 18 Rd No 10A",
+    "url": null
+  }
+]

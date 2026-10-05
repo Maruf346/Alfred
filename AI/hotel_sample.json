@@ -1,0 +1,195 @@
+{
+  "type": "hotel",
+  "name": "Wyndham Tamansari Jivva Resort Bali",
+  "description": "Contemporary rooms & suites in a fashionable beachfront resort with dining, outdoor pools & a spa.",
+  "link": "http://wyndhamjivvabali.com/?CID=LC:46q62bu8edfbx3y:49340&iata=00093796",
+  "property_token": "ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB",
+  "serpapi_property_details_link": "https://serpapi.com/search.json?adults=2&check_in_date=2026-08-01&check_out_date=2026-08-05&children=0&currency=USD&engine=google_hotels&gl=us&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB&q=hotels+in+bali",
+  "gps_coordinates": {
+    "latitude": -8.573117,
+    "longitude": 115.3837247
+  },
+  "check_in_time": "2:00 PM",
+  "rate_per_night": {
+    "lowest": "$39",
+    "extracted_lowest": 39
+  },
+  "total_rate": {
+    "lowest": "$157",
+    "extracted_lowest": 157
+  },
+  "nearby_places": [
+    {
+      "name": "The Amazing Taman Safari Bali",
+      "transportations": [
+        {
+          "type": "Taxi",
+          "duration": "9 min"
+        }
+      ]
+    },
+    {
+      "name": "I Gusti Ngurah Rai International Airport",
+      "transportations": [
+        {
+          "type": "Taxi",
+          "duration": "1 hr"
+        }
+      ]
+    },
+    {
+      "name": "Jivva Beach Club",
+      "transportations": [
+        {
+          "type": "Walking",
+          "duration": "4 min"
+        }
+      ]
+    }
+  ],
+  "hotel_class": "5-star hotel",
+  "extracted_hotel_class": 5,
+  "images": [
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkhD8KyULOY0q8GwlhvF2g-udsXLfY3sNzUczY6lD-yRRpjN0mQKzCLnzWRaZAeucUegga0mvETD0K4vyVzo8Dc5mRNDmFpZ8X9kOFL48heCPBn4DwhlbmIi8ebW_Xh-UivPx8vo0fK30ws=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkhD8KyULOY0q8GwlhvF2g-udsXLfY3sNzUczY6lD-yRRpjN0mQKzCLnzWRaZAeucUegga0mvETD0K4vyVzo8Dc5mRNDmFpZ8X9kOFL48heCPBn4DwhlbmIi8ebW_Xh-UivPx8vo0fK30ws=s10000"
+    },
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkgS2Okj5YrmQlaSTz_NhB_SFO-aa6BJkhfyu7LwPNHR1Gxb0FiQ2ARQKFyOhNEXKvZX2lwB0YoSkw_8SoCfvWGzUn6sagqJKxSUaiQ1g71lRfce9lOF5y6fs0Szdz11XI-U51J=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkgS2Okj5YrmQlaSTz_NhB_SFO-aa6BJkhfyu7LwPNHR1Gxb0FiQ2ARQKFyOhNEXKvZX2lwB0YoSkw_8SoCfvWGzUn6sagqJKxSUaiQ1g71lRfce9lOF5y6fs0Szdz11XI-U51J=s10000"
+    },
+    {
+      "thumbnail": "https://lh4.googleusercontent.com/proxy/CeH5ljphNg3CuT5a7oQ9tCBy76HpsF8VmE_aB5ShCjQ7tIJYye5jH93sUiqCu7gTFrC5BJwdsY3NIcD3xhTqPEIIk0TlLXXPq4KDMyf94MvApukndeGNf_mZtwUFDBx8hmonBW9VjMV4PTu6BAALm8-ieJyFaA=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://photos.hotelbeds.com/giata/original/54/540001/540001a_hb_p_002.jpg"
+    },
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkO4Hf2YJaFzomw_vuLJ5ogqqQm5Ga-hDeZ0XW-URaKN57_QVBFK96cMImiaJAQs38ZPJQaegvcRHEfmprJOP1BUtM96aqQdxq-3Mkarf3P2-QbbDCQDNrGB5ZOzuSf1nPSzajr=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkO4Hf2YJaFzomw_vuLJ5ogqqQm5Ga-hDeZ0XW-URaKN57_QVBFK96cMImiaJAQs38ZPJQaegvcRHEfmprJOP1BUtM96aqQdxq-3Mkarf3P2-QbbDCQDNrGB5ZOzuSf1nPSzajr=s10000"
+    },
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkmIApHvYFCUtd-YUc_rUkc77lwTc4uP9L5V4cu0iInL_ub4LIUJk76g0QC0oJZ2UzalmcmHyefEwFJjrMLED43C0q8-MduBxP3JGsJweZmnQBiokAkpqjx42CVEQnzm0X1JxurRLRbulef=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkmIApHvYFCUtd-YUc_rUkc77lwTc4uP9L5V4cu0iInL_ub4LIUJk76g0QC0oJZ2UzalmcmHyefEwFJjrMLED43C0q8-MduBxP3JGsJweZmnQBiokAkpqjx42CVEQnzm0X1JxurRLRbulef=s10000"
+    },
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnS2wBFZuVgmreUE5ADhN156vXJJeUXDWgtuePqRCXX3RnhPXJPB2PfiL71YDdfW0Yvkht_PleEFb25h3OuClr3nsBWH5nIcgwWncTEOk26kUJxe1x5OBYmwiM5_CkPfXYzWZQuG-jW6eUC=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnS2wBFZuVgmreUE5ADhN156vXJJeUXDWgtuePqRCXX3RnhPXJPB2PfiL71YDdfW0Yvkht_PleEFb25h3OuClr3nsBWH5nIcgwWncTEOk26kUJxe1x5OBYmwiM5_CkPfXYzWZQuG-jW6eUC=s10000"
+    },
+    {
+      "thumbnail": "https://lh4.googleusercontent.com/proxy/8QRIL1SLcOO74D2wa_proS5c0Xd23XA8-nTTN4YAdIUed0E4NI4x_pwnAdZwh9cLrg_nH32lxcdUuHuQ3EKCameHlPOMwsrEozwwAzeAHQTh7_AQTfxFXyvcV6LVwMcG5Ryz1jlmqPFVCQrO_rYZ9Y8aQdT5cA=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://d2hyz2bfif3cr8.cloudfront.net/imageRepo/7/0/128/357/753/jivva-lagoon_O.jpg"
+    },
+    {
+      "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWl7A0A4eq7ysvHn9BmEgFsTg_oIuOSIC3QT5WkNWsDODYlPDDUMz7XybsWTKFe0-U8KoE9zBu13b1JGoIWyP8AIpAOica1Dc0DH6FFFasmsM4-C4PiBgT9SKJ0BGjpAJ7uwKmzaVlmH3DI=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWl7A0A4eq7ysvHn9BmEgFsTg_oIuOSIC3QT5WkNWsDODYlPDDUMz7XybsWTKFe0-U8KoE9zBu13b1JGoIWyP8AIpAOica1Dc0DH6FFFasmsM4-C4PiBgT9SKJ0BGjpAJ7uwKmzaVlmH3DI=s10000"
+    },
+    {
+      "thumbnail": "https://lh4.googleusercontent.com/proxy/1n_AacCEVzT6TAQzn2PaaxkdA09AXUbGt_XYjnFdWq0EzVmyfqSYze8S5Qk6vz9IoVGrCsE3v-KS12GPUXe0wlHViN2LhU6fmsnppunz0TIQsLl9vkRFhiV4uv6Vhm4aI-zYUIFPCFku5EGM76Hcm-_ARtwDHA=s287-w287-h192-n-k-no-v1",
+      "original_image": "https://d2hyz2bfif3cr8.cloudfront.net/imageRepo/7/0/128/357/745/jivva-bumbu-restaurant-1_R.jpg"
+    }
+  ],
+  "overall_rating": 4.4,
+  "reviews": 2739,
+  "ratings": [
+    {
+      "stars": 5,
+      "count": 1873
+    },
+    {
+      "stars": 4,
+      "count": 464
+    },
+    {
+      "stars": 3,
+      "count": 158
+    },
+    {
+      "stars": 2,
+      "count": 94
+    },
+    {
+      "stars": 1,
+      "count": 150
+    }
+  ],
+  "location_rating": 2.8,
+  "reviews_breakdown": [
+    {
+      "name": "Property",
+      "description": "Property",
+      "total_mentioned": 353,
+      "positive": 257,
+      "negative": 71,
+      "neutral": 25,
+      "category_token": "qPRjhHica1yRnFiSmp5fVDl5RUBRfkFqUUklI5wFANGQDTY",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=qPRjhHica1yRnFiSmp5fVDl5RUBRfkFqUUklI5wFANGQDTY&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    },
+    {
+      "name": "Nature",
+      "description": "Nature and outdoor activities",
+      "total_mentioned": 188,
+      "positive": 131,
+      "negative": 29,
+      "neutral": 28,
+      "category_token": "2kxK7Hica1yRnFiSmp5fVDl5r19iSWlRqkJiXopCfmlJSn5-kUJicklmWWZJZmox4zKINAAIZRQx",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=2kxK7Hica1yRnFiSmp5fVDl5r19iSWlRqkJiXopCfmlJSn5-kUJicklmWWZJZmox4zKINAAIZRQx&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    },
+    {
+      "name": "Service",
+      "description": "Service",
+      "total_mentioned": 243,
+      "positive": 173,
+      "negative": 58,
+      "neutral": 12,
+      "category_token": "DZ7RYHica1yRnFiSmp5fVDl5eXBqUVlmciojjAEAtX8MDA",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=DZ7RYHica1yRnFiSmp5fVDl5eXBqUVlmciojjAEAtX8MDA&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    },
+    {
+      "name": "Parking",
+      "description": "Parking",
+      "total_mentioned": 10,
+      "positive": 4,
+      "negative": 5,
+      "neutral": 1,
+      "category_token": "yumor3ica1yRnFiSmp5fVDl5eUBiUXZmXjoTjAEAtNkMAw",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=yumor3ica1yRnFiSmp5fVDl5eUBiUXZmXjoTjAEAtNkMAw&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    },
+    {
+      "name": "Hot Tub",
+      "description": "Hot tub",
+      "total_mentioned": 14,
+      "positive": 4,
+      "negative": 9,
+      "neutral": 1,
+      "category_token": "Tv-jr3ica1yRnFiSmp5fVDl5uUd-iUJJaRITmBFSmgQAsNsLdw",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=Tv-jr3ica1yRnFiSmp5fVDl5uUd-iUJJaRITmBFSmgQAsNsLdw&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    },
+    {
+      "name": "TV",
+      "description": "Room entertainment",
+      "total_mentioned": 12,
+      "positive": 3,
+      "negative": 8,
+      "neutral": 1,
+      "category_token": "652Lknica1yRnFiSmp5fVDl5U1B-fq5Cal5JalFJYmZeLpDFtCgkDAAGpA5W",
+      "serpapi_link": "https://serpapi.com/search.json?category_token=652Lknica1yRnFiSmp5fVDl5U1B-fq5Cal5JalFJYmZeLpDFtCgkDAAGpA5W&engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+    }
+  ],
+  "amenities": [
+    "Breakfast",
+    "Free Wi-Fi",
+    "Free parking",
+    "Pools",
+    "Air conditioning",
+    "Fitness center",
+    "Spa",
+    "Beach access",
+    "Restaurant",
+    "Room service",
+    "Airport shuttle",
+    "Full-service laundry",
+    "Accessible",
+    "Kid-friendly"
+  ],
+  "serpapi_google_hotels_reviews_link": "https://serpapi.com/search.json?engine=google_hotels_reviews&hl=en&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB",
+  "serpapi_google_hotels_photos_link": "https://serpapi.com/search.json?engine=google_hotels_photos&property_token=ChoIr97n8-f4wPm8ARoNL2cvMTFid3A2aGJzNhAB"
+}
